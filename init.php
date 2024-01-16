@@ -19,6 +19,8 @@ if (!class_exists('Login_Security')) :
     public function __construct()
     {
       $this->init();
+
+      include_once( 'class-image-authentication.php');
     }
 
     private function init()
@@ -34,7 +36,7 @@ if (!class_exists('Login_Security')) :
       add_filter('wp_redirect', array($this, 'login_wp_redirect'));
     }
 
-    public function return_error_default_login_url()
+    public static function return_error_default_login_url()
     {
       if (!defined('LOGIN_CHANGE') || sha1('page_changed') !== LOGIN_CHANGE) {
           global $wp_query;
@@ -45,7 +47,7 @@ if (!class_exists('Login_Security')) :
       }
     }
 
-    public function login_change_site_url($url, $path)
+    public static function login_change_site_url($url, $path)
     {
       $require_login_name = apply_filters('login_endpoint_name', self::DEFAULT_LOGIN_NAME);
       if (strpos($path, 'wp-login.php') !== false
@@ -56,7 +58,7 @@ if (!class_exists('Login_Security')) :
       return $url;
     }
 
-    public function login_wp_redirect($location)
+    public static function login_wp_redirect($location)
     {
       $require_login_name = apply_filters('login_endpoint_name', self::DEFAULT_LOGIN_NAME);
 
@@ -66,7 +68,7 @@ if (!class_exists('Login_Security')) :
       return $location;
     }
 
-    public function login_redirect()
+    public static function login_redirect()
     {
       $full_uri = (is_ssl() ? 'https' : 'http') . '://' . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"];
       $full_uri = explode('?', $full_uri)[0];
@@ -75,6 +77,10 @@ if (!class_exists('Login_Security')) :
       if ($full_uri === home_url('/') . $require_login_name) {
           header("HTTP/1.1 200 LOGIN PAGE");
           define('LOGIN_CHANGE', sha1('page_changed'));
+
+          $user_login = '';
+          $error = '';
+
           require_once(ABSPATH . '/wp-login.php');
           exit;
       }
